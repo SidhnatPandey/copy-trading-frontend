@@ -1,23 +1,49 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { TrendingUp, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+export const signupSchema = yup.object().shape({
+  userName: yup
+    .string()
+    .min(3, "Name must be at least 3 characters")
+    .required("Name is required"),
+
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .required("Email is required"),
+
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required")
+});
+
+type SignupFormValues = yup.InferType<typeof signupSchema>;
 
 export default function Signup() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email || !password) { toast.error("Fill in all fields"); return; }
-    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+  const form = useForm<SignupFormValues>({
+    resolver: yupResolver(signupSchema),
+    defaultValues: {
+      userName: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleSignup = async (values: SignupFormValues) => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     toast.success("Account created!");
     navigate("/");
     setLoading(false);
@@ -37,31 +63,82 @@ export default function Signup() {
           <h2 className="text-lg font-semibold text-center mb-1">Create account</h2>
           <p className="text-sm text-muted-foreground text-center mb-6">Start copy trading today</p>
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Full Name</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Alex Kim"
-                className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com"
-                className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Password</label>
-              <div className="relative">
-                <input type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
-                  className="w-full h-10 px-3 pr-10 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSignup)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="userName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>User Name</FormLabel>
+                    <FormControl>
+                      <input
+                        type="text"
+                        placeholder="Alex Kim"
+                        autoComplete="username"
+                        {...field}
+                        className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <input
+                        type="email"
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        {...field}
+                        className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <div className="relative">
+                      <FormControl>
+                        <input
+                          type={showPw ? "text" : "password"}
+                          placeholder="••••••••"
+                          autoComplete="new-password"
+                          {...field}
+                          className="w-full h-10 px-3 pr-10 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        />
+                      </FormControl>
+                      <button
+                        type="button"
+                        onClick={() => setShowPw(!showPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating account..." : "Create Account"}
+              </Button>
+            </form>
+          </Form>
         </div>
 
         <p className="text-sm text-muted-foreground text-center mt-4">
