@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { TrendingUp, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { login } from "@/apiService/authService";
 
 const loginSchema = yup.object({
   email: yup
@@ -36,10 +44,20 @@ export default function Login() {
 
   const handleLogin = async (values: LoginFormValues) => {
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Welcome back!");
-    navigate("/");
-    setLoading(false);
+    login(values)
+      .then((res) => {
+        if (res.status === 200) {
+          localStorage.setItem("jwtToken", res.data.token);
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Login failed. Please check your credentials.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -53,11 +71,18 @@ export default function Login() {
         </div>
 
         <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-center mb-1">Welcome back</h2>
-          <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your account</p>
+          <h2 className="text-lg font-semibold text-center mb-1">
+            Welcome back
+          </h2>
+          <p className="text-sm text-muted-foreground text-center mb-6">
+            Sign in to your account
+          </p>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleLogin)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="email"
@@ -99,7 +124,11 @@ export default function Login() {
                         onClick={() => setShowPw(!showPw)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
-                        {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPw ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                     <FormMessage />
@@ -115,7 +144,10 @@ export default function Login() {
         </div>
 
         <p className="text-sm text-muted-foreground text-center mt-4">
-          Don't have an account? <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline">
+            Sign up
+          </Link>
         </p>
       </div>
     </div>
