@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { env } from "next-runtime-env";
 
-const baseUrl = env('NEXT_PUBLIC_BASE_URL');
+const baseUrl = import.meta.env.VITE_NEXT_PUBLIC_BASE_URL || '';
 
 const axiosInstance = axios.create({
     baseURL: baseUrl,
@@ -14,10 +13,10 @@ export const setApiBaseUrl = (url: string) => {
             base_url = baseUrl;
             break;
         case 'security' :
-            base_url = env('NEXT_PUBLIC_SECURITY_BASE_URL');
+            base_url = import.meta.env.VITE_NEXT_PUBLIC_SECURITY_BASE_URL || '';
             break;
         case 'copy-trading' :
-            base_url = env('NEXT_PUBLIC_COPY_TRADING_BASE_URL');
+            base_url = import.meta.env.VITE_NEXT_PUBLIC_COPY_TRADING_BASE_URL || '';
             break;
         default :
             base_url = baseUrl;
