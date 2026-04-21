@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { signup } from "@/apiService/authService";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const signupSchema = yup.object().shape({
   username: yup
@@ -31,6 +31,8 @@ export const signupSchema = yup.object().shape({
     .string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
+  
+  role: yup.string().oneOf(["trader", "investor"]).required("Role is required"),
 });
 
 type SignupFormValues = yup.InferType<typeof signupSchema>;
@@ -39,6 +41,7 @@ export default function Signup() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: yupResolver(signupSchema),
@@ -46,23 +49,27 @@ export default function Signup() {
       username: "",
       email: "",
       password: "",
+      role: "investor",
     },
   });
 
   const handleSignup = async (values: SignupFormValues) => {
     setLoading(true);
-    signup(values)
-      .then((res) => {
-        if (res.status === 201) {
-          toast.success("Account Created Successfully!");
-          navigate("/login");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Failed to create account.");
-      })
-      .finally(() => setLoading(false));
+    try {
+      await signup({
+        name: values.username,
+        email: values.email,
+        password: values.password,
+        role: values.role,
+      });
+      toast.success("Account Created Successfully!");
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create account.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -156,6 +163,26 @@ export default function Signup() {
                         )}
                       </button>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        >
+                          <option value="investor">Investor</option>
+                          <option value="trader">Trader</option>
+                        </select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

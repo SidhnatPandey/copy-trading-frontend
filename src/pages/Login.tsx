@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { login } from "@/apiService/authService";
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = yup.object({
   email: yup
@@ -33,6 +33,8 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: yupResolver(loginSchema),
@@ -44,20 +46,19 @@ export default function Login() {
 
   const handleLogin = async (values: LoginFormValues) => {
     setLoading(true);
-    login(values)
-      .then((res) => {
-        if (res.status === 200) {
-          localStorage.setItem("jwtToken", res.data.token);
-          navigate("/");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Login failed. Please check your credentials.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      await login(values.email, values.password);
+      toast.success("Login successful!");
+
+      // Redirect to the intended page or default to traders
+      const from = location.state?.from?.pathname || "/traders";
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error(err);
+      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute, PublicRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -13,6 +15,7 @@ import CopyTrading from "./pages/CopyTrading";
 import Portfolio from "./pages/Portfolio";
 import Market from "./pages/Market";
 import NotFound from "./pages/NotFound";
+import Unauthorized from "./pages/Unauthorized";
 
 const queryClient = new QueryClient();
 
@@ -22,23 +25,93 @@ function LayoutWrap({ children }: { children: React.ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/traders" element={<LayoutWrap><Traders /></LayoutWrap>} />
-          <Route path="/traders/:id" element={<LayoutWrap><TraderProfile /></LayoutWrap>} />
-          <Route path="/copy-trading" element={<LayoutWrap><CopyTrading /></LayoutWrap>} />
-          <Route path="/portfolio" element={<LayoutWrap><Portfolio /></LayoutWrap>} />
-          <Route path="/market" element={<LayoutWrap><Market /></LayoutWrap>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/"
+              element={<Navigate to="/login" replace />}
+            />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute restricted redirectPath="/traders">
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicRoute restricted redirectPath="/traders">
+                  <Signup />
+                </PublicRoute>
+              }
+            />
+
+            {/* Protected routes */}
+            <Route
+              path="/traders"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <Traders />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/traders/:id"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <TraderProfile />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/copy-trading"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <CopyTrading />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/portfolio"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <Portfolio />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/market"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <Market />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Special routes */}
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

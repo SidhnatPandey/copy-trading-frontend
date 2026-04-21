@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
-import { post } from "@/service/masterService";
+import { post } from "@/services/masterService";
 import { APP_API } from "@/constants/api.constant";
-import { setApiBaseUrl } from "@/service/interceptor";
+import { setApiBaseUrl } from "@/services/interceptor";
 
 export const signup =  (user: any) => {
     setApiBaseUrl('core');
