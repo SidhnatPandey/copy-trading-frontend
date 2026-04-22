@@ -9,12 +9,13 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { TrendingUp, Eye, EyeOff } from "lucide-react";
+import { TrendingUp, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 const loginSchema = yup.object({
   email: yup
@@ -49,8 +50,6 @@ export default function Login() {
     try {
       await login(values.email, values.password);
       toast.success("Login successful!");
-
-      // Redirect to the intended page or default to traders
       const from = location.state?.from?.pathname || "/traders";
       navigate(from, { replace: true });
     } catch (err) {
@@ -62,44 +61,68 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
       <div className="w-full max-w-sm animate-slide-up">
+        {/* Header */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
             <TrendingUp className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-semibold tracking-tight">CopyFi</span>
+          <span className="text-2xl font-bold tracking-tight">CopyFi</span>
         </div>
 
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-center mb-1">
-            Welcome back
-          </h2>
-          <p className="text-sm text-muted-foreground text-center mb-6">
-            Sign in to your account
-          </p>
+        {/* Form Card */}
+        <div className="glass-card p-7 border border-border/50 shadow-lg rounded-lg backdrop-blur-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-foreground text-center mb-2">
+              Welcome back
+            </h2>
+            <p className="text-sm text-muted-foreground text-center">
+              Sign in to your trading account
+            </p>
+          </div>
 
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleLogin)}
-              className="space-y-4"
+              className="space-y-5"
             >
               <FormField
                 control={form.control}
                 name="email"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-sm font-medium">Email</FormLabel>
                     <FormControl>
-                      <input
-                        type="email"
-                        placeholder="you@example.com"
-                        autoComplete="username"
-                        {...field}
-                        className="w-full h-10 px-3 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      />
+                      <div className="relative">
+                        <input
+                          type="email"
+                          placeholder="you@example.com"
+                          autoComplete="username"
+                          {...field}
+                          className={cn(
+                            "w-full h-10 px-3 rounded-md border text-sm transition-all",
+                            "bg-background border-input placeholder:text-muted-foreground",
+                            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
+                            fieldState.error && "border-destructive focus:ring-destructive"
+                          )}
+                        />
+                        {!fieldState.error && field.value && (
+                          <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                        )}
+                        {fieldState.error && (
+                          <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                        )}
+                      </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs flex items-center gap-1">
+                      {fieldState.error && (
+                        <>
+                          <AlertCircle className="h-3 w-3" />
+                          {fieldState.error.message}
+                        </>
+                      )}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -107,49 +130,93 @@ export default function Login() {
               <FormField
                 control={form.control}
                 name="password"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <div className="relative">
-                      <FormControl>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <Link 
+                        to="#" 
+                        className="text-xs text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <FormControl>
+                      <div className="relative">
                         <input
                           type={showPw ? "text" : "password"}
                           placeholder="••••••••"
                           autoComplete="current-password"
                           {...field}
-                          className="w-full h-10 px-3 pr-10 rounded-md bg-muted border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                          className={cn(
+                            "w-full h-10 px-3 pr-10 rounded-md border text-sm transition-all",
+                            "bg-background border-input placeholder:text-muted-foreground",
+                            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
+                            fieldState.error && "border-destructive focus:ring-destructive"
+                          )}
                         />
-                      </FormControl>
-                      <button
-                        type="button"
-                        onClick={() => setShowPw(!showPw)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showPw ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    <FormMessage />
+                        <button
+                          type="button"
+                          onClick={() => setShowPw(!showPw)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPw ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs flex items-center gap-1">
+                      {fieldState.error && (
+                        <>
+                          <AlertCircle className="h-3 w-3" />
+                          {fieldState.error.message}
+                        </>
+                      )}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+              <Button 
+                type="submit" 
+                className="w-full h-10 font-medium text-base"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
           </Form>
         </div>
 
-        <p className="text-sm text-muted-foreground text-center mt-4">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-primary hover:underline">
-            Sign up
-          </Link>
-        </p>
+        {/* Footer */}
+        <div className="mt-6 space-y-4">
+          <p className="text-sm text-muted-foreground text-center">
+            Don't have an account?{" "}
+            <Link 
+              to="/signup" 
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Create one now
+            </Link>
+          </p>
+          
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            By signing in, you agree to our{" "}
+            <a href="#" className="text-primary hover:underline">Terms of Service</a>
+            {" "}and{" "}
+            <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+          </p>
+        </div>
       </div>
     </div>
   );
