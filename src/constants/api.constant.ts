@@ -4,4 +4,8 @@ export const APP_API = {
     register: 'api/auth/register',
     // logout: 'api/auth/logout',
     // forgotPassword: 'api/auth/forgot-password',
+
+
+    // Market Data
+    marketData: 'api/market/latest',
 };

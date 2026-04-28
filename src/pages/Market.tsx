@@ -1,25 +1,38 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
-import { marketData as initialData } from "@/lib/mock-data";
+import { getLatestMarketData } from "@/apiService/marketService";
+import { toast } from "sonner";
 
 export default function Market() {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Simulate live price updates
   useEffect(() => {
     const interval = setInterval(() => {
-      setData(prev => prev.map(coin => ({
-        ...coin,
-        price: coin.price * (1 + (Math.random() - 0.5) * 0.002),
-        change24h: coin.change24h + (Math.random() - 0.5) * 0.1,
-      })));
-    }, 3000);
+      fetchLatestData();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  useEffect (() => {
+    fetchLatestData();
+  }, []);
+
+  const fetchLatestData = async () => {
+    setLoading(true);
+    getLatestMarketData().then(response => {
+      setData(response.data);
+    }).catch(error => {
+      toast.error("Failed to fetch market data. Please try again later.");
+    }).finally(() => {
+      setLoading(false);
+    });
+  }
+
   const refresh = () => {
     setRefreshing(true);
+    fetchLatestData();
     setTimeout(() => setRefreshing(false), 800);
   };
 
@@ -55,7 +68,7 @@ export default function Market() {
               </tr>
             </thead>
             <tbody>
-              {data.map((coin, i) => (
+              {data.length > 0 && data.map((coin, i) => (
                 <tr key={coin.symbol} className="border-b border-border/50 hover:bg-accent/50 transition-colors animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
                   <td className="px-5 py-4 text-muted-foreground">{i + 1}</td>
                   <td className="px-5 py-4">
