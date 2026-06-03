@@ -13,7 +13,12 @@ export const login = (user: any) => {
     return post(APP_API.login, user);
 };
 
-// export const forgotPassword = (email: string) => {
-//     setApiBaseUrl('core');
-//     return post(APP_API.forgotPassword, { email });
-// };
+export const forgotPassword = (email: string) => {
+    setApiBaseUrl('core');
+    return post(APP_API.forgotPassword, { email });
+};
+
+export const resetPassword = ({ password, token }: { password: string; token: string }) => {
+    setApiBaseUrl('core');
+    return post(APP_API.resetPassword, { password, token });
+};

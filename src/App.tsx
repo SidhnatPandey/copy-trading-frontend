@@ -16,6 +16,8 @@ import Portfolio from "./pages/Portfolio";
 import Market from "./pages/Market";
 import NotFound from "./pages/NotFound";
 import Unauthorized from "./pages/Unauthorized";
+import ResetPassword from "./pages/Reset-password";
+import ForgotPassword from "./pages/Forgot-password";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,22 @@ const App = () => (
               element={
                 <PublicRoute restricted redirectPath="/traders">
                   <Signup />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicRoute restricted redirectPath="/traders">
+                  <ForgotPassword />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicRoute restricted redirectPath="/traders">
+                  <ResetPassword />
                 </PublicRoute>
               }
             />
