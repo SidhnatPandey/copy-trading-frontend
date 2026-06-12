@@ -8,4 +8,6 @@ export const APP_API = {
 
     // Market Data
     marketData: 'api/market/latest',
+    // Users
+    users: 'api/users'
 };

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute, PublicRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
-import Index from "./pages/Index";
+// import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Traders from "./pages/Traders";
@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Unauthorized from "./pages/Unauthorized";
 import ResetPassword from "./pages/Reset-password";
 import ForgotPassword from "./pages/Forgot-password";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,16 @@ const App = () => (
                 <ProtectedRoute>
                   <LayoutWrap>
                     <Portfolio />
+                  </LayoutWrap>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <LayoutWrap>
+                    <UserProfile />
                   </LayoutWrap>
                 </ProtectedRoute>
               }

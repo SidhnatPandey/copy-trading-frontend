@@ -135,7 +135,7 @@ export default function Login() {
                     <div className="flex items-center justify-between">
                       <FormLabel className="text-sm font-medium">Password</FormLabel>
                       <Link 
-                        to="#" 
+                        to="/forgot-password" 
                         className="text-xs text-primary hover:text-primary/80 transition-colors"
                       >
                         Forgot password?
