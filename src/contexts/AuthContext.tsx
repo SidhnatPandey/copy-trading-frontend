@@ -75,6 +75,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  avatar?: string;
   role: UserRole;
   isAuthenticated: boolean;
 }
@@ -84,6 +85,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   signup: (userData: any) => Promise<void>;
+  refreshUser: (id?: string) => Promise<void>;
   hasPermission: (permission: Permission) => boolean;
   hasAnyPermission: (permissions: Permission[]) => boolean;
   hasAllPermissions: (permissions: Permission[]) => boolean;
@@ -137,6 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: response.data.user.id,
         email: response.data.user.email,
         name: response.data.user.name,
+        avatar: response.data.user.profile_image_url || response.data.user.profile_image_url || response.data.user.profile_image_url || undefined,
         role: response.data.user.role || UserRole.INVESTOR, // Default role
         isAuthenticated: true
       };
@@ -181,6 +184,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshUser = async (id?: string) => {
+    try {
+      const userId = id || user?.id;
+      if (!userId) return;
+      const { getUser } = await import('@/apiService/authService');
+      const response = await getUser(userId);
+      if (response && response.data) {
+        const userData: User = {
+          id: response.data.id || response.data._id || userId,
+          email: response.data.email,
+          name: response.data.name,
+          avatar: response.data.profile_image_url || response.data.profile_image_url || response.data.profile_image_url || undefined,
+          role: response.data.role || UserRole.INVESTOR,
+          isAuthenticated: true
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const hasPermission = (permission: Permission): boolean => {
     if (!user || !user.isAuthenticated) return false;
     return ACL_RULES[user.role]?.includes(permission) || false;
@@ -207,6 +233,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     signup,
+    refreshUser,
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,

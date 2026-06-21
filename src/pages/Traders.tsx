@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { traders } from "@/lib/mock-data";
 import { TraderCard } from "@/components/TraderCard";
 import { CopyModal } from "@/components/CopyModal";

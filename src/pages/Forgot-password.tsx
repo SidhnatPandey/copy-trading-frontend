@@ -9,52 +9,46 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { TrendingUp, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
+import { TrendingUp, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { forgotPassword } from "@/apiService/authService";
 
-const loginSchema = yup.object({
+const forgotPasswordSchema = yup.object({
   email: yup
     .string()
     .email("Invalid email format")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .required("Password is required"),
+    .required("Email is required")
 });
 
-type LoginFormValues = yup.InferType<typeof loginSchema>;
+type ForgotPasswordFormValues = yup.InferType<typeof forgotPasswordSchema>;
 
-export default function Login() {
+export default function ForgotPassword() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
 
-  const form = useForm<LoginFormValues>({
-    resolver: yupResolver(loginSchema),
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: yupResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  const handleLogin = async (values: LoginFormValues) => {
+  const handleLogin = async (values: ForgotPasswordFormValues) => {
     setLoading(true);
     try {
-      await login(values.email, values.password);
-      toast.success("Login successful!");
-      const from = location.state?.from?.pathname || "/traders";
+      await forgotPassword(values.email);
+      toast.success("An Email has been sent to your registered Account!");
+      const from = location.state?.from?.pathname || "/reset-password";
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
-      toast.error("Login failed. Please check your credentials.");
+      toast.error("Failed to send password reset email. Please check your email address.");
     } finally {
       setLoading(false);
     }
@@ -75,10 +69,10 @@ export default function Login() {
         <div className="glass-card p-7 border border-border/50 shadow-lg rounded-lg backdrop-blur-sm">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-foreground text-center mb-2">
-              Welcome back
+              Reset Password
             </h2>
             <p className="text-sm text-muted-foreground text-center">
-              Sign in to your trading account
+              Enter your email to receive a password reset link
             </p>
           </div>
 
@@ -126,60 +120,6 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-sm font-medium">Password</FormLabel>
-                      <Link 
-                        to="/forgot-password" 
-                        className="text-xs text-primary hover:text-primary/80 transition-colors"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <div className="relative">
-                        <input
-                          type={showPw ? "text" : "password"}
-                          placeholder="••••••••"
-                          autoComplete="current-password"
-                          {...field}
-                          className={cn(
-                            "w-full h-10 px-3 pr-10 rounded-md border text-sm transition-all",
-                            "bg-background border-input placeholder:text-muted-foreground",
-                            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
-                            fieldState.error && "border-destructive focus:ring-destructive"
-                          )}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPw(!showPw)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPw ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage className="text-xs flex items-center gap-1">
-                      {fieldState.error && (
-                        <>
-                          <AlertCircle className="h-3 w-3" />
-                          {fieldState.error.message}
-                        </>
-                      )}
-                    </FormMessage>
-                  </FormItem>
-                )}
-              />
-
               <Button 
                 type="submit" 
                 className="w-full h-10 font-medium text-base"
@@ -188,35 +128,15 @@ export default function Login() {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent"></div>
-                    Signing in...
+                    Sending reset link...
                   </div>
                 ) : (
-                  "Sign In"
+                  "Send Reset Link"
                 )}
               </Button>
             </form>
           </Form>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 space-y-4">
-          <p className="text-sm text-muted-foreground text-center">
-            Don't have an account?{" "}
-            <Link 
-              to="/signup" 
-              className="font-semibold text-primary hover:text-primary/80 transition-colors"
-            >
-              Create one now
-            </Link>
-          </p>
-          
-          <p className="text-xs text-muted-foreground text-center leading-relaxed">
-            By signing in, you agree to our{" "}
-            <a href="#" className="text-primary hover:underline">Terms of Service</a>
-            {" "}and{" "}
-            <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-          </p>
-        </div>
+        </div>         
       </div>
     </div>
   );
