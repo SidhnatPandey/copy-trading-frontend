@@ -139,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: response.data.user.id,
         email: response.data.user.email,
         name: response.data.user.name,
-        avatar: response.data.user.avatar || response.data.user.avatarUrl || response.data.user.profileImage || undefined,
+        avatar: response.data.user.profile_image_url || response.data.user.profile_image_url || response.data.user.profile_image_url || undefined,
         role: response.data.user.role || UserRole.INVESTOR, // Default role
         isAuthenticated: true
       };
@@ -195,7 +195,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: response.data.id || response.data._id || userId,
           email: response.data.email,
           name: response.data.name,
-          avatar: response.data.avatar || response.data.avatarUrl || response.data.profileImage || undefined,
+          avatar: response.data.profile_image_url || response.data.profile_image_url || response.data.profile_image_url || undefined,
           role: response.data.role || UserRole.INVESTOR,
           isAuthenticated: true
         };
